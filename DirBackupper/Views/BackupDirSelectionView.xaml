@@ -1,0 +1,34 @@
+﻿<UserControl x:Class="DirBackupper.Views.BackupDirSelectionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DirBackupper.Views"
+             mc:Ignorable="d" 
+             Background="White" d:DesignWidth="800" Height="197.333">
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <Label Content="Source" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="64" />
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" Margin="6,0,24,0" Height="24" />
+                <Button Content="..." Grid.Column="1" Margin="0,0,12,0" />
+            </Grid>
+
+            <Separator Margin="7,18,7,8" Background="LightGray" />
+
+            <Label Content="Destination" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="64" />
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" Margin="6,0,24,0" Height="24" />
+                <Button Content="..." Grid.Column="1" Margin="0,0,12,0" />
+            </Grid>
+        </StackPanel>
+    </Grid>
+</UserControl>
