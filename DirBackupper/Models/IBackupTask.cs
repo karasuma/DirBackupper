@@ -29,5 +29,8 @@ namespace DirBackupper.Models
 	public interface IBackupTask
 	{
 		Task<TaskDoneStatus> Execute(IProgress<ProgressInfo> progress, string sourceDir, string destDir);
+		void CancelExecute();
+		bool AllowOverwrite { get; set; }
+
 	}
 }

@@ -11,8 +11,6 @@ namespace DirBackupper.Models
 	{
 		private CancellationTokenSource _cancellation = null;
 
-		private bool PendingFlag { get; set; } = false;
-
 		public bool AllowOverwrite { get; set; } = false;
 
 		public Backup(bool overwrite)
@@ -52,7 +50,7 @@ namespace DirBackupper.Models
 			Directory.CreateDirectory( dir );
 		}
 
-		public async Task<TaskDoneStatus> Execute(IProgress<ProgressInfo> progress, string sourceDir, string destdir)
+		public async Task<TaskDoneStatus> Execute(IProgress<ProgressInfo> progress, string sourceDir, string destDir)
 		{
 			var message = new Func<string, string>( msg =>
 			 {
@@ -60,7 +58,7 @@ namespace DirBackupper.Models
 				 {
 					 msg,
 					 "Source: " + Path.GetFullPath( sourceDir ),
-					 "Dest  : " + Path.GetFullPath( destdir )
+					 "Dest  : " + Path.GetFullPath( destDir )
 				 } );
 			 } );
 			var logging = new Action<string, string, float, Logger.LogStates>( (caption, msg, value, state) =>
@@ -92,15 +90,15 @@ namespace DirBackupper.Models
 						 allFiles = srcpathes.Count();
 
 						 // Create destination directory
-						 if ( !Directory.Exists( destdir ) )
-							 Directory.CreateDirectory( destdir );
+						 if ( !Directory.Exists( destDir ) )
+							 Directory.CreateDirectory( destDir );
 
 						 // Copy files
 						 foreach ( var src in srcpathes )
 						 {
 							 var isDir = isDirectory( src );
 							 var realsrc = src.Substring( 3 );
-							 var dst = Path.Combine( Path.GetDirectoryName( destdir ), realsrc.Substring( realsrc.IndexOf( sourceDir ) + sourceDir.Length ) ) + ( isDir ? "\\" : "" );
+							 var dst = Path.Combine( Path.GetDirectoryName( destDir ), realsrc.Substring( realsrc.IndexOf( sourceDir ) + sourceDir.Length ) ) + ( isDir ? "\\" : "" );
 
 							 proceededFileCount++;
 
@@ -143,12 +141,6 @@ namespace DirBackupper.Models
 			return TaskDoneStatus.Completed;
 		}
 
-		public void TaskCancel()
-		{
-			_cancellation?.Cancel();
-			PendingFlag = false;
-		}
-
-		public void SwitchPending() => PendingFlag = !PendingFlag;
+		public void CancelExecute() => _cancellation?.Cancel();
 	}
 }
