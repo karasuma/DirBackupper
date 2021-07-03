@@ -3,7 +3,7 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using DirBackupper.Models;
+using DirBackupper.Models.Modules;
 using DirBackupper.Utils;
 using System.IO;
 using System.Diagnostics;

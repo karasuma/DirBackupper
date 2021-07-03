@@ -90,8 +90,8 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Models\Backup.cs" />
-    <Compile Include="Models\IBackupTask.cs" />
+    <Compile Include="Models\Modules\Backup.cs" />
+    <Compile Include="Models\Modules\IBackupTask.cs" />
     <Compile Include="Utils\Logger.cs" />
     <Compile Include="Utils\Tools.cs" />
     <Compile Include="Views\BackupDirSelectionView.xaml.cs">

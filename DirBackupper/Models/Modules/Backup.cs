@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DirBackupper.Models
+namespace DirBackupper.Models.Modules
 {
 	public class Backup : IBackupTask
 	{
