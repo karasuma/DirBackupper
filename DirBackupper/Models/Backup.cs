@@ -1,37 +1,16 @@
 ﻿using DirBackupper.Utils;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace DirBackupper.Models
 {
-	public class Backup
+	public class Backup : IBackupTask
 	{
-		public enum BackupDoneStatus
-		{
-			None, Completed, Failed, Cancelled
-		}
-
-		public struct ProgressInfo
-		{
-			public float Ratio { get; }
-			public string Message { get; }
-
-			public ProgressInfo(float ratio, string message)
-			{
-				Ratio = ratio < 0f ? ratio : 1f < ratio ? 1f : ratio;
-				Message = message;
-			}
-
-			public const float Minimum = 0f;
-			public const float Maximum = 1f;
-		}
-
 		private CancellationTokenSource _cancellation = null;
+
 		private bool PendingFlag { get; set; } = false;
 
 		public bool AllowOverwrite { get; set; } = false;
@@ -73,15 +52,15 @@ namespace DirBackupper.Models
 			Directory.CreateDirectory( dir );
 		}
 
-		public async Task<BackupDoneStatus> Execute(IProgress<ProgressInfo> progress, string srcdir, string dstdir)
+		public async Task<TaskDoneStatus> Execute(IProgress<ProgressInfo> progress, string sourceDir, string destdir)
 		{
 			var message = new Func<string, string>( msg =>
 			 {
 				 return string.Join( Tools.NewLine, new[]
 				 {
 					 msg,
-					 "Source: " + Path.GetFullPath( srcdir ),
-					 "Dest  : " + Path.GetFullPath( dstdir )
+					 "Source: " + Path.GetFullPath( sourceDir ),
+					 "Dest  : " + Path.GetFullPath( destdir )
 				 } );
 			 } );
 			var logging = new Action<string, string, float, Logger.LogStates>( (caption, msg, value, state) =>
@@ -106,22 +85,22 @@ namespace DirBackupper.Models
 						 // Count all files
 						 var srcpathes = new[]
 						 {
-							 Directory.GetDirectories( srcdir, "*", SearchOption.AllDirectories ).Select( p => "D::" + p ),
-							 Directory.GetFiles( srcdir, "*", SearchOption.AllDirectories ).Select(p => "F::" + p )
+							 Directory.GetDirectories( sourceDir, "*", SearchOption.AllDirectories ).Select( p => "D::" + p ),
+							 Directory.GetFiles( sourceDir, "*", SearchOption.AllDirectories ).Select(p => "F::" + p )
 						 }.SelectMany( x => x ).Distinct();
 						 var isDirectory = new Func<string, bool>(p => p.Substring(0, 3) == "D::");
 						 allFiles = srcpathes.Count();
 
 						 // Create destination directory
-						 if ( !Directory.Exists( dstdir ) )
-							 Directory.CreateDirectory( dstdir );
+						 if ( !Directory.Exists( destdir ) )
+							 Directory.CreateDirectory( destdir );
 
 						 // Copy files
 						 foreach ( var src in srcpathes )
 						 {
 							 var isDir = isDirectory( src );
 							 var realsrc = src.Substring( 3 );
-							 var dst = Path.Combine( Path.GetDirectoryName( dstdir ), realsrc.Substring( realsrc.IndexOf( srcdir ) + srcdir.Length ) ) + ( isDir ? "\\" : "" );
+							 var dst = Path.Combine( Path.GetDirectoryName( destdir ), realsrc.Substring( realsrc.IndexOf( sourceDir ) + sourceDir.Length ) ) + ( isDir ? "\\" : "" );
 
 							 proceededFileCount++;
 
@@ -151,17 +130,17 @@ namespace DirBackupper.Models
 				catch ( OperationCanceledException ocex )
 				{
 					logging( "Backup operation cancelled.", ocex.ToString(), ratio, Logger.LogStates.Warn );
-					return BackupDoneStatus.Cancelled;
+					return TaskDoneStatus.Cancelled;
 				}
 				catch ( Exception unknownex )
 				{
 					logging( "Backup operation failed.", unknownex.ToString(), ratio, Logger.LogStates.Error );
-					return BackupDoneStatus.Failed;
+					return TaskDoneStatus.Failed;
 				}
 			}
 
 			logging( "Backup operation has completed successfully!", string.Empty, ProgressInfo.Maximum, Logger.LogStates.Info );
-			return BackupDoneStatus.Completed;
+			return TaskDoneStatus.Completed;
 		}
 
 		public void TaskCancel()

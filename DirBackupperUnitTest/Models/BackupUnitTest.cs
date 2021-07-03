@@ -67,14 +67,14 @@ namespace DirBackupperUnitTest
 			}
 		}
 
-		private async Task<Backup.BackupDoneStatus> MainExecuteProcess()
+		private async Task<TaskDoneStatus> MainExecuteProcess()
 		{
 			var proc = new Backup( true );
-			var result = Backup.BackupDoneStatus.None;
+			var result = TaskDoneStatus.None;
 			using ( var listener = new ConsoleTraceListener() )
 			{
 				Trace.Listeners.Add( listener );
-				var progress = new Progress<Backup.ProgressInfo>();
+				var progress = new Progress<ProgressInfo>();
 				result = await proc.Execute( progress, SourceDir, DestDir );
 				Console.WriteLine( $"Executed: {result}" );
 				Trace.Listeners.Remove( listener );
@@ -94,7 +94,7 @@ namespace DirBackupperUnitTest
 			var result = await MainExecuteProcess();
 
 			// Assert
-			Assert.AreEqual( Backup.BackupDoneStatus.Completed, result );
+			Assert.AreEqual( TaskDoneStatus.Completed, result );
 		}
 
 		[TestMethod]
@@ -110,8 +110,8 @@ namespace DirBackupperUnitTest
 			var result2 = await MainExecuteProcess();
 
 			// Arrange
-			Assert.AreEqual( Backup.BackupDoneStatus.Completed, result1, "First check (create)" );
-			Assert.AreEqual( Backup.BackupDoneStatus.Completed, result2, "Second check (overwrite)" );
+			Assert.AreEqual( TaskDoneStatus.Completed, result1, "First check (create)" );
+			Assert.AreEqual( TaskDoneStatus.Completed, result2, "Second check (overwrite)" );
 		}
 	}
 }
