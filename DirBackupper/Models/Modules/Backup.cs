@@ -51,40 +51,29 @@ namespace DirBackupper.Models.Modules
 					var currentRatio = new Func<float>( () => allFiles > 0 ? (float)proceededFileCount / (float)allFiles : 0f );
 					await Task.Run( () =>
 					 {
-						 // Count all files
-						 var srcpathes = new[]
-						 {
-							 Directory.GetDirectories( sourceDir, "*", SearchOption.AllDirectories ).Select( p => "D::" + p ),
-							 Directory.GetFiles( sourceDir, "*", SearchOption.AllDirectories ).Select(p => "F::" + p )
-						 }.SelectMany( x => x ).Distinct();
-						 var isDirectory = new Func<string, bool>(p => p.Substring(0, 3) == "D::");
-						 allFiles = srcpathes.Count();
-
 						 // Create destination directory
 						 if ( !Directory.Exists( destDir ) )
 							 Directory.CreateDirectory( destDir );
 
+						 // Create directories if necessary
+						 foreach ( var src in Directory.GetDirectories( sourceDir, "*", SearchOption.AllDirectories ).Select( p => p + "\\" ) )
+						 {
+							 var dest = Path.Combine( Path.GetDirectoryName( destDir ), src.Substring( src.IndexOf( sourceDir ) + sourceDir.Length ) );
+
+							 if ( !Directory.Exists( Path.GetDirectoryName( dest ) ) )
+								 Tools.CreateDirectoryRecursive( dest );
+						 }
+
+						 // Copy files
 						 var parallelOptions = new ParallelOptions()
 						 {
 							 CancellationToken = _cancellation.Token,
 							 MaxDegreeOfParallelism = Environment.ProcessorCount
 						 };
-						 // Copy directories
-						 Parallel.ForEach( Directory.GetDirectories( sourceDir, "*", SearchOption.AllDirectories ).Select( p => p + "\\" ), parallelOptions, src =>
-						  {
-							  var dest = Path.Combine( Path.GetDirectoryName( destDir ), src.Substring( src.IndexOf( sourceDir ) + sourceDir.Length ) );
-
-							  if ( !Directory.Exists( Path.GetDirectoryName( dest ) ) )
-								  Tools.CreateDirectoryRecursive( dest );
-
-							  proceededFileCount++;
-							  ReportInfo( progress, currentRatio(), "Copied: " + src );
-						  } );
-
-						 // Copy files
 						 Parallel.ForEach( Directory.GetFiles( sourceDir, "*", SearchOption.AllDirectories ), parallelOptions, async src =>
 						 {
 							 var dest = Path.Combine( Path.GetDirectoryName( destDir ), src.Substring( src.IndexOf( sourceDir ) + sourceDir.Length ) );
+
 							 var moved = AllowOverwrite || !File.Exists( src );
 							 if ( moved )
 								 await Tools.CopyFileStrictlyAsync( src, dest );
