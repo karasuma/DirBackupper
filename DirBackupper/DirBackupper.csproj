@@ -92,6 +92,7 @@
     </Compile>
     <Compile Include="Models\Modules\Backup.cs" />
     <Compile Include="Models\Modules\IBackupTask.cs" />
+    <Compile Include="Models\Modules\Restore.cs" />
     <Compile Include="Utils\Logger.cs" />
     <Compile Include="Utils\Tools.cs" />
     <Compile Include="Views\BackupDirSelectionView.xaml.cs">
