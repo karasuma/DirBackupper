@@ -1,0 +1,85 @@
+﻿<UserControl x:Class="DirBackupper.Views.BackupScheduleSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DirBackupper.Views"
+             mc:Ignorable="d" 
+             Background="White"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="./ViewToolsDictionary.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid Margin="8,0">
+        <Grid.Resources>
+            <Style TargetType="CheckBox">
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+
+            <Style x:Key="InputArea" TargetType="TextBox">
+                <Setter Property="Margin" Value="16,0" />
+                <Setter Property="Height" Value="24" />
+            </Style>
+        </Grid.Resources>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="38" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Vertical">
+            <ItemsControl Style="{StaticResource Block}">
+                <Label Grid.Column="0" Style="{StaticResource Display}" Content="Scheduled" />
+                <CheckBox Grid.Column="1" Content="Check if you want to execute at the some interval of time." Margin="16,0" VerticalAlignment="Center" x:Name="useScheduleCheck" IsChecked="True" />
+            </ItemsControl>
+
+            <GroupBox Header="Schedule settings" IsEnabled="{Binding IsChecked, ElementName=useScheduleCheck}">
+                <StackPanel Orientation="Vertical">
+                    <ItemsControl Style="{StaticResource Block}">
+                        <Label Grid.Column="0" Style="{StaticResource Display}" Content="Day span" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="8,0">
+                            <CheckBox Content="Use day span" Margin="0,0,23,0" x:Name="DayspanCheck" />
+                            <StackPanel Orientation="Horizontal" IsEnabled="{Binding IsChecked, ElementName=DayspanCheck}">
+                                <Label Content="Once every" VerticalAlignment="Center" />
+                                <TextBox Width="42" Height="21" />
+                                <Label Content="day(s)" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </StackPanel>
+                    </ItemsControl>
+
+                    <ItemsControl Style="{StaticResource Block}">
+                        <Label Grid.Column="0" Style="{StaticResource Display}" Content="Execute weeks" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="8,0,0,0">
+                            <CheckBox Content="Execute on" Margin="0,0,38,0" x:Name="weekCheck" />
+                            <StackPanel Orientation="Horizontal" IsEnabled="{Binding IsChecked, ElementName=weekCheck}">
+                                <CheckBox Content="Sun" />
+                                <CheckBox Content="Mon" Margin="16,0,0,0" />
+                                <CheckBox Content="Tue" Margin="16,0,0,0" />
+                                <CheckBox Content="Wed" Margin="16,0,0,0" />
+                                <CheckBox Content="Thu" Margin="16,0,0,0" />
+                                <CheckBox Content="Fri" Margin="16,0,0,0" />
+                                <CheckBox Content="Sat" Margin="16,0,0,0" />
+                            </StackPanel>
+                        </StackPanel>
+                    </ItemsControl>
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
+
+        <Grid Grid.Row="1" Margin="8,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="92" />
+                <ColumnDefinition Width="82" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0" Content="Start schedule" Height="21" />
+            <Button Grid.Column="1" Content="Stop" Height="21" Margin="8,0" />
+        </Grid>
+    </Grid>
+</UserControl>

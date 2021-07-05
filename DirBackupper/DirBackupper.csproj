@@ -82,6 +82,22 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\BackupScheduleSettingsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\BackupSettingsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SoftwareSettingsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ViewToolsDictionary.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Windows\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -97,6 +113,15 @@
     <Compile Include="Utils\Tools.cs" />
     <Compile Include="Views\BackupDirSelectionView.xaml.cs">
       <DependentUpon>BackupDirSelectionView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\BackupScheduleSettingsView.xaml.cs">
+      <DependentUpon>BackupScheduleSettingsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\BackupSettingsView.xaml.cs">
+      <DependentUpon>BackupSettingsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SoftwareSettingsView.xaml.cs">
+      <DependentUpon>SoftwareSettingsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>

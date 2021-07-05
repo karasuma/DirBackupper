@@ -42,7 +42,7 @@ namespace DirBackupper.Models.Modules
 
 			using ( _cancellation = new CancellationTokenSource() )
 			{
-				logging( "Backup operation start.", string.Empty, ratio, Logger.LogStates.Info );
+				logging( "Copy operation start.", string.Empty, ratio, Logger.LogStates.Info );
 
 				try
 				{
@@ -85,17 +85,17 @@ namespace DirBackupper.Models.Modules
 				}
 				catch ( OperationCanceledException ocex )
 				{
-					logging( "Backup operation cancelled.", ocex.ToString(), ratio, Logger.LogStates.Warn );
+					logging( "Copy operation cancelled.", ocex.ToString(), ratio, Logger.LogStates.Warn );
 					return TaskDoneStatus.Cancelled;
 				}
 				catch ( Exception unknownex )
 				{
-					logging( "Backup operation failed.", unknownex.ToString(), ratio, Logger.LogStates.Error );
+					logging( "Copy operation failed.", unknownex.ToString(), ratio, Logger.LogStates.Error );
 					return TaskDoneStatus.Failed;
 				}
 			}
 
-			logging( "Backup operation has completed successfully!", string.Empty, ProgressInfo.Maximum, Logger.LogStates.Info );
+			logging( "Copy operation has completed successfully!", string.Empty, ProgressInfo.Maximum, Logger.LogStates.Info );
 			return TaskDoneStatus.Completed;
 		}
 
