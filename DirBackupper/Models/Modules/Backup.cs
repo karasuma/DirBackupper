@@ -1,5 +1,6 @@
 ﻿using DirBackupper.Utils;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -18,8 +19,10 @@ namespace DirBackupper.Models.Modules
 			AllowOverwrite = overwrite;
 		}
 
-		private void ReportInfo(IProgress<ProgressInfo> progress, float ratio, string message)
-			=> progress.Report( new ProgressInfo( ratio, message ) );
+		private KeyValuePair<int, int> Progress(int current, int ceiling) => new KeyValuePair<int, int>( current, ceiling );
+
+		private void ReportInfo(IProgress<ProgressInfo> progress, KeyValuePair<int, int> status, string message)
+			=> progress.Report( new ProgressInfo( status, message ) );
 
 		public async Task<TaskDoneStatus> Execute(IProgress<ProgressInfo> progress, string sourceDir, string destDir)
 		{
@@ -32,23 +35,21 @@ namespace DirBackupper.Models.Modules
 					 "Dest  : " + Path.GetFullPath( destDir )
 				 } );
 			 } );
-			var logging = new Action<string, string, float, Logger.LogStates>( (caption, msg, value, state) =>
+			var logging = new Action<string, string, KeyValuePair<int, int>, Logger.LogStates>( (caption, msg, value, state) =>
 			{
 				ReportInfo( progress, value, caption );
 				Logger.Log( message( string.IsNullOrEmpty( msg ) ? caption : string.Join( Tools.NewLine, new[] { caption, msg } ) ), state );
 			} );
 
-			var ratio = ProgressInfo.Minimum;
-
 			using ( _cancellation = new CancellationTokenSource() )
 			{
-				logging( "Copy operation start.", string.Empty, ratio, Logger.LogStates.Info );
+				var proceededFileCount = 0;
+				var allFiles = int.MaxValue;
+				var currentRatio = new Func<KeyValuePair<int, int>>( () => Progress( proceededFileCount, allFiles ) );
+				logging( "Copy operation start.", string.Empty, currentRatio(), Logger.LogStates.Info );
 
 				try
 				{
-					var proceededFileCount = 0;
-					var allFiles = int.MaxValue;
-					var currentRatio = new Func<float>( () => allFiles > 0 ? (float)proceededFileCount / (float)allFiles : 0f );
 					await Task.Run( () =>
 					 {
 						 // Create destination directory
@@ -85,17 +86,17 @@ namespace DirBackupper.Models.Modules
 				}
 				catch ( OperationCanceledException ocex )
 				{
-					logging( "Copy operation cancelled.", ocex.ToString(), ratio, Logger.LogStates.Warn );
+					logging( "Copy operation cancelled.", ocex.ToString(), currentRatio(), Logger.LogStates.Warn );
 					return TaskDoneStatus.Cancelled;
 				}
 				catch ( Exception unknownex )
 				{
-					logging( "Copy operation failed.", unknownex.ToString(), ratio, Logger.LogStates.Error );
+					logging( "Copy operation failed.", unknownex.ToString(), currentRatio(), Logger.LogStates.Error );
 					return TaskDoneStatus.Failed;
 				}
 			}
 
-			logging( "Copy operation has completed successfully!", string.Empty, ProgressInfo.Maximum, Logger.LogStates.Info );
+			logging( "Copy operation has completed successfully!", string.Empty, Progress( 1, 1 ), Logger.LogStates.Info );
 			return TaskDoneStatus.Completed;
 		}
 

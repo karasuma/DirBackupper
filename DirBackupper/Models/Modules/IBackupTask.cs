@@ -8,12 +8,13 @@ namespace DirBackupper.Models.Modules
 {
 	public struct ProgressInfo
 	{
-		public float Ratio { get; }
+		public float Ratio { get => ProcessingFiles.Value > 0 ? ( ProcessingFiles.Key / ProcessingFiles.Value ) : 0f; }
+		public KeyValuePair<int, int> ProcessingFiles { get; }
 		public string Message { get; }
 
-		public ProgressInfo(float ratio, string message)
+		public ProgressInfo(KeyValuePair<int, int> processings, string message)
 		{
-			Ratio = ratio < 0f ? ratio : 1f < ratio ? 1f : ratio;
+			ProcessingFiles = processings;
 			Message = message;
 		}
 

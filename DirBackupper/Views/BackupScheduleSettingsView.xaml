@@ -38,7 +38,7 @@
                 <CheckBox Grid.Column="1" Content="Check if you want to execute at the some interval of time." Margin="16,0" VerticalAlignment="Center" x:Name="useScheduleCheck" IsChecked="True" />
             </ItemsControl>
 
-            <GroupBox Header="Schedule settings" IsEnabled="{Binding IsChecked, ElementName=useScheduleCheck}">
+            <GroupBox Header="Schedule settings" IsEnabled="{Binding IsChecked, ElementName=useScheduleCheck}" Margin="0,-12,0,0">
                 <StackPanel Orientation="Vertical">
                     <ItemsControl Style="{StaticResource Block}">
                         <Label Grid.Column="0" Style="{StaticResource Display}" Content="Day span" />

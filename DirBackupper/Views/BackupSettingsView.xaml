@@ -2,10 +2,13 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:vm="clr-namespace:DirBackupper.ViewModels"
+             xmlns:valid="clr-namespace:DirBackupper.Validation"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DirBackupper.Views"
              mc:Ignorable="d" 
              Background="White"
+             d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type={x:Type vm:BackupSettingsViewModelSample}}"
              d:DesignHeight="373" d:DesignWidth="800">
     <UserControl.Resources>
         <ResourceDictionary>
@@ -26,12 +29,20 @@
         <StackPanel Orientation="Vertical" Margin="0,8">
             <ItemsControl Style="{StaticResource Block}">
                 <Label Grid.Column="0" Style="{StaticResource Display}" Content="Temporary directory" />
-                <TextBox Grid.Column="1" Style="{StaticResource InputArea}" />
+                <TextBox Grid.Column="1" Style="{StaticResource InputArea}">
+                    <TextBox.Text>
+                        <Binding Path="TemporaryPath.Value" UpdateSourceTrigger="PropertyChanged">
+                            <Binding.ValidationRules>
+                                <valid:UriValidationRule />
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
             </ItemsControl>
 
             <ItemsControl Style="{StaticResource Block}">
                 <Label Grid.Column="0" Style="{StaticResource Display}" Content="Allow overwrite" />
-                <CheckBox Grid.Column="1" Content="Ignore source files if these have already backupped." Margin="16,0" VerticalAlignment="Center" />
+                <CheckBox Grid.Column="1" Content="Ignore source files if these have already backupped." Margin="16,0" VerticalAlignment="Center" IsChecked="{Binding AllowOverwrite.Value}" />
             </ItemsControl>
         </StackPanel>
     </Grid>

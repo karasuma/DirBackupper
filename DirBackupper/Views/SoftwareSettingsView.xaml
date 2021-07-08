@@ -3,8 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:vm="clr-namespace:DirBackupper.ViewModels"
              xmlns:local="clr-namespace:DirBackupper.Views"
              mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type={x:Type vm:SoftwareSettingsViewModelSample}}"
              Background="White"
              d:DesignHeight="386" d:DesignWidth="800">
 
@@ -25,14 +27,28 @@
 
         <StackPanel Orientation="Vertical">
             <ItemsControl Style="{StaticResource Block}">
-                <Label Grid.Column="0" Style="{StaticResource Display}" Content="Allow multiple startup" />
-                <CheckBox Grid.Column="1" Content="" Margin="8,0" />
+                <Label Grid.Column="0" Style="{StaticResource Display}" Content="Setup file path" />
+                <Label Grid.Column="1" Margin="8,3" Content="{Binding SetupFilePath.Value}" Foreground="DimGray" />
             </ItemsControl>
 
             <ItemsControl Style="{StaticResource Block}">
-                <Label Grid.Column="0" Style="{StaticResource Display}" Content="Setup file path" />
-                <TextBox Grid.Column="1" Margin="8,3" />
+                <Label Grid.Column="0" Style="{StaticResource Display}" Content="Allow multiple startup" />
+                <CheckBox Grid.Column="1" Content="" Margin="8,0" IsChecked="{Binding AllowMultipleSetup.Value}" />
             </ItemsControl>
+
+            <ItemsControl Style="{StaticResource Block}">
+                <Label Grid.Column="0" Style="{StaticResource Display}" Content="Development mode" />
+                <CheckBox Grid.Column="1" Content="CAUTION: Development contents may affect your computer system." IsChecked="{Binding IsDevelopmentMode.Value}" FontWeight="DemiBold" Foreground="Crimson" Margin="8,0" x:Name="devCheck" />
+            </ItemsControl>
+
+            <GroupBox Header="Development options" IsEnabled="{Binding IsChecked, ElementName=devCheck}"  Margin="10,-10,10,0">
+                <StackPanel Orientation="Vertical">
+                    <ItemsControl Style="{StaticResource Block}">
+                        <Label Grid.Column="0" Style="{StaticResource Display}" Content="Button execution test" />
+                        <CheckBox Grid.Column="1" Margin="8,0" Content="Do nothing but messaging if checked here when the buttons clicked." IsChecked="{Binding ButtonExecutionTesting.Value}" />
+                    </ItemsControl>
+                </StackPanel>
+            </GroupBox>
         </StackPanel>
     </Grid>
 </UserControl>

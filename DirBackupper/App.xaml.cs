@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
+﻿using DirBackupper.Utils;
+using DirBackupper.ViewModels;
+using System;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using DirBackupper.Utils;
 
 namespace DirBackupper
 {
@@ -16,6 +12,7 @@ namespace DirBackupper
 	public partial class App : Application
 	{
 		private static Window Window = null;
+		private static MainWindowViewModel ViewModel = null;
 		private static Mutex Mutex = null;
 
 		private void SafeShutdown(int exitcode, bool forceShutdown = true, bool releaseMutex = false)
@@ -43,14 +40,16 @@ namespace DirBackupper
 			DispatcherUnhandledException += App_DispatcherUnhandledException;
 
 			var isContinueProcess = true;
-			Mutex = new Mutex( false, "DirectoryBackupper::_::YakumoKarasuma" );
+			var canStartupMultiple = Models.SystemSettings.CanStartupMultiple();
+			Mutex = !canStartupMultiple ? new Mutex( false, "DirectoryBackupper::_::YakumoKarasuma" ) : default( Mutex );
 
-			if( !Mutex.WaitOne( 9, false ) )
+			if( !canStartupMultiple && !Mutex.WaitOne( 0, false ) )
 				isContinueProcess = false;
 
 			if( Window == null && isContinueProcess )
 			{
-				Window = new MainWindow();
+				ViewModel = new MainWindowViewModel();
+				Window = new MainWindow() { DataContext = ViewModel };
 				Window.Show();
 			}
 
@@ -62,8 +61,8 @@ namespace DirBackupper
 
 		protected override void OnExit(ExitEventArgs e)
 		{
-			if( Window != null )
-				Window.Close();
+			Window?.Close();
+			ViewModel?.Dispose();
 			SafeShutdown( 0, false, true );
 
 			AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
