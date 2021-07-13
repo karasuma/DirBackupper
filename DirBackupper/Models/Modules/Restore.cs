@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -18,7 +19,8 @@ namespace DirBackupper.Models.Modules
 			TemporaryPath = string.IsNullOrEmpty( tempPath ) ? Path.GetFullPath( ".\\Stockpile\\" ) : tempPath;
 		}
 
-		private CancellationTokenSource _cancellation = null;
+		private CancellationTokenSource _executeCancellation = null;
+		private CancellationTokenSource _backupCancellation = null;
 
 		public bool AllowOverwrite { get; set; } = false;
 
@@ -26,17 +28,21 @@ namespace DirBackupper.Models.Modules
 
 		public bool IsRestoring { get; private set; } = false;
 
+		public uint BufferLength { get; set; } = 0;
+
 		public void CancelExecute()
 		{
 			if ( IsRestoring )
 				throw new InvalidOperationException( "Restore operation can not cancel!" );
-			_cancellation?.Cancel();
+			_executeCancellation?.Cancel();
+			_backupCancellation?.Cancel();
 		}
 
 		public async Task<TaskDoneStatus> BackupToTemporary(string sourceDir)
 		{
 			try
 			{
+				Tools.DestructDirectory( TemporaryPath );
 				return await Execute( null, sourceDir, TemporaryPath );
 			}
 			catch ( OperationCanceledException )
@@ -55,11 +61,11 @@ namespace DirBackupper.Models.Modules
 		public async Task<TaskDoneStatus> Execute(IProgress<ProgressInfo> none, string tempDir, string restoreDir)
 		{
 			IsRestoring = true;
-			using ( _cancellation = new CancellationTokenSource() )
+			using ( _executeCancellation = new CancellationTokenSource() )
 			{
 				try
 				{
-					await Task.Run( () =>
+					await Task.Run( async () =>
 					{
 						// Create destination directory
 						if ( !Directory.Exists( restoreDir ) )
@@ -68,6 +74,7 @@ namespace DirBackupper.Models.Modules
 						// Create directories if necessary
 						foreach ( var src in Directory.GetDirectories( tempDir, "*", SearchOption.AllDirectories ).Select( p => p + "\\" ) )
 						{
+							if ( _executeCancellation.IsCancellationRequested ) return;
 							var dest = Path.Combine( Path.GetDirectoryName( restoreDir ), src.Substring( src.IndexOf( tempDir ) + tempDir.Length ) );
 
 							if ( !Directory.Exists( Path.GetDirectoryName( dest ) ) )
@@ -77,19 +84,20 @@ namespace DirBackupper.Models.Modules
 						// Copy files
 						var parallelOptions = new ParallelOptions()
 						{
-							CancellationToken = _cancellation.Token,
+							CancellationToken = _executeCancellation.Token,
 							MaxDegreeOfParallelism = Environment.ProcessorCount
 						};
-						Parallel.ForEach( Directory.GetFiles( tempDir, "*", SearchOption.AllDirectories ), parallelOptions, async src =>
-							{
-								var dest = Path.Combine( Path.GetDirectoryName( restoreDir ), src.Substring( src.IndexOf( tempDir ) + tempDir.Length ) );
+						foreach ( var src in Directory.GetFiles( tempDir, "*", SearchOption.AllDirectories ) )
+						{
+							if ( _executeCancellation.IsCancellationRequested ) return;
+							var dest = Path.Combine( Path.GetDirectoryName( restoreDir ), src.Substring( src.IndexOf( tempDir ) + tempDir.Length ) );
 
-								if ( AllowOverwrite || !File.Exists( src ) )
-									await Tools.CopyFileStrictlyAsync( src, dest );
-							} );
-					}, _cancellation.Token ).ConfigureAwait( false );
+							if ( AllowOverwrite || !File.Exists( src ) )
+								await Tools.CopyFileStrictlyAsync( src, dest, BufferLength, _executeCancellation.Token );
+						}
+					}, _executeCancellation.Token );
 				}
-				catch ( OperationCanceledException )
+				catch ( TaskCanceledException )
 				{
 					throw;
 				}
@@ -104,7 +112,6 @@ namespace DirBackupper.Models.Modules
 				}
 			}
 
-			Logger.Log( $"Restore operation completed successfully!", Logger.LogStates.Info );
 			return TaskDoneStatus.Completed;
 		}
 	}

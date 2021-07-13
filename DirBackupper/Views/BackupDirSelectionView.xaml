@@ -11,7 +11,7 @@
              Background="White" d:DesignWidth="800" Height="197.333">
     <Grid>
         <StackPanel Orientation="Vertical">
-            <Label Content="Source" />
+            <Label Content="Backup Source" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -31,7 +31,7 @@
 
             <Separator Margin="7,18,7,8" Background="LightGray" />
 
-            <Label Content="Destination" />
+            <Label Content="Backup Destination" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />

@@ -32,7 +32,7 @@ namespace DirBackupper.Utils
 			var newline = Environment.NewLine;
 			var logstr =
 				$"[{state.ToString().ToUpper(),-5}] {DateTime.Now.ToString( "yyyy-MM-dd HH:mm:ss" )}{newline}" +
-				$"{memberName} at [{sourceFilePath}:{sourceLineNumber}]{newline}" +
+				$"{memberName} at [{Path.GetFileName(sourceFilePath)}:{sourceLineNumber}]{newline}" +
 				$"{message}{newline}" +
 				$"{newline}";
 

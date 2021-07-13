@@ -42,7 +42,20 @@
 
             <ItemsControl Style="{StaticResource Block}">
                 <Label Grid.Column="0" Style="{StaticResource Display}" Content="Allow overwrite" />
-                <CheckBox Grid.Column="1" Content="Ignore source files if these have already backupped." Margin="16,0" VerticalAlignment="Center" IsChecked="{Binding AllowOverwrite.Value}" />
+                <CheckBox Grid.Column="1" Margin="16,0" VerticalAlignment="Center" IsChecked="{Binding AllowOverwrite.Value}" />
+            </ItemsControl>
+
+            <ItemsControl Style="{StaticResource Block}">
+                <Label Grid.Column="0" Style="{StaticResource Display}" Content="Copy buffer length" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <TextBox Text="{Binding BufferLengthMB.Value}" Margin="16,0,0,0" Height="24" Width="48" HorizontalContentAlignment="Right" Padding="2" />
+                    <Label Content="MB (If value sets 0, the individual file copies all bytes on memory)" />
+                </StackPanel>
+            </ItemsControl>
+
+            <ItemsControl Style="{StaticResource Block}">
+                <Label Grid.Column="0" Style="{StaticResource Display}" Content="Compress backup data" />
+                <CheckBox Grid.Column="1" Margin="16,0" Content="Applies also restore operation if checked." VerticalAlignment="Center" IsChecked="{Binding CompressBackup.Value}" />
             </ItemsControl>
         </StackPanel>
     </Grid>

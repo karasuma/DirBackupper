@@ -14,6 +14,8 @@ namespace DirBackupper.Models.Modules
 
 		public bool AllowOverwrite { get; set; } = false;
 
+		public uint BufferLength { get; set; } = 0;
+
 		public Backup(bool overwrite)
 		{
 			AllowOverwrite = overwrite;
@@ -46,11 +48,11 @@ namespace DirBackupper.Models.Modules
 				var proceededFileCount = 0;
 				var allFiles = int.MaxValue;
 				var currentRatio = new Func<KeyValuePair<int, int>>( () => Progress( proceededFileCount, allFiles ) );
-				logging( "Copy operation start.", string.Empty, currentRatio(), Logger.LogStates.Info );
+				ReportInfo( progress, currentRatio(), "Copy operation start." );
 
 				try
 				{
-					await Task.Run( () =>
+					await Task.Run( async () =>
 					 {
 						 // Create destination directory
 						 if ( !Directory.Exists( destDir ) )
@@ -59,32 +61,30 @@ namespace DirBackupper.Models.Modules
 						 // Create directories if necessary
 						 foreach ( var src in Directory.GetDirectories( sourceDir, "*", SearchOption.AllDirectories ).Select( p => p + "\\" ) )
 						 {
+							 if ( _cancellation.IsCancellationRequested ) return;
 							 var dest = Path.Combine( Path.GetDirectoryName( destDir ), src.Substring( src.IndexOf( sourceDir ) + sourceDir.Length ) );
+							 ReportInfo( progress, currentRatio(), $"dir: {dest}" );
 
 							 if ( !Directory.Exists( Path.GetDirectoryName( dest ) ) )
 								 Tools.CreateDirectoryRecursive( dest );
 						 }
 
 						 // Copy files
-						 var parallelOptions = new ParallelOptions()
+						 foreach ( var src in Directory.GetFiles( sourceDir, "*", SearchOption.AllDirectories ) )
 						 {
-							 CancellationToken = _cancellation.Token,
-							 MaxDegreeOfParallelism = Environment.ProcessorCount
-						 };
-						 Parallel.ForEach( Directory.GetFiles( sourceDir, "*", SearchOption.AllDirectories ), parallelOptions, async src =>
-						 {
+							 if ( _cancellation.IsCancellationRequested ) return;
 							 var dest = Path.Combine( Path.GetDirectoryName( destDir ), src.Substring( src.IndexOf( sourceDir ) + sourceDir.Length ) );
-
 							 var moved = AllowOverwrite || !File.Exists( src );
+							 ReportInfo( progress, currentRatio(), moved ? $"Copying: {src}" : $"Hold: {dest}" );
+
 							 if ( moved )
-								 await Tools.CopyFileStrictlyAsync( src, dest );
+								 await Tools.CopyFileStrictlyAsync( src, dest, BufferLength, _cancellation.Token );
 
 							 proceededFileCount++;
-							 ReportInfo( progress, currentRatio(), moved ? $"Copied: {src}" : $"Hold: {dest}" );
-						 } );
-					 }, _cancellation.Token ).ConfigureAwait( false );
+						 }
+					 }, _cancellation.Token );
 				}
-				catch ( OperationCanceledException ocex )
+				catch ( TaskCanceledException ocex )
 				{
 					logging( "Copy operation cancelled.", ocex.ToString(), currentRatio(), Logger.LogStates.Warn );
 					return TaskDoneStatus.Cancelled;
@@ -96,7 +96,7 @@ namespace DirBackupper.Models.Modules
 				}
 			}
 
-			logging( "Copy operation has completed successfully!", string.Empty, Progress( 1, 1 ), Logger.LogStates.Info );
+			ReportInfo( progress, Progress( 1, 1 ), "Copy operation has completed successfully!" );
 			return TaskDoneStatus.Completed;
 		}
 

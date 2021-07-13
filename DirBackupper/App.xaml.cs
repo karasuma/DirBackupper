@@ -3,6 +3,7 @@ using DirBackupper.ViewModels;
 using System;
 using System.Threading;
 using System.Windows;
+using System.Reactive.Linq;
 
 namespace DirBackupper
 {
@@ -40,10 +41,9 @@ namespace DirBackupper
 			DispatcherUnhandledException += App_DispatcherUnhandledException;
 
 			var isContinueProcess = true;
-			var canStartupMultiple = Models.SystemSettings.CanStartupMultiple();
-			Mutex = !canStartupMultiple ? new Mutex( false, "DirectoryBackupper::_::YakumoKarasuma" ) : default( Mutex );
+			Mutex = new Mutex( false, "DirectoryBackupper::_::YakumoKarasuma" );
 
-			if( !canStartupMultiple && !Mutex.WaitOne( 0, false ) )
+			if( !Mutex.WaitOne( 0, false ) )
 				isContinueProcess = false;
 
 			if( Window == null && isContinueProcess )

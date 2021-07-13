@@ -12,11 +12,17 @@ namespace DirBackupper.ViewModels
 		public ReactiveProperty<string> TemporaryPath { get; }
 		public ReactiveProperty<bool> AllowOverwrite { get; }
 
+		public ReactiveProperty<uint> BufferLengthMB { get; }
+
+		public ReactiveProperty<bool> CompressBackup { get; }
+
 		public BackupSettingsViewModel(BackupExecution model)
 		{
 			_model = model;
 			TemporaryPath = _model.ToReactivePropertyAsSynchronized( m => m.TemporaryFilePath );
 			AllowOverwrite = _model.ToReactivePropertyAsSynchronized( m => m.AllowOverwrite );
+			BufferLengthMB = _model.ToReactivePropertyAsSynchronized( m => m.BufferLengthMByte );
+			CompressBackup = _model.ToReactivePropertyAsSynchronized( m => m.IsCompress );
 		}
 	}
 
@@ -25,7 +31,9 @@ namespace DirBackupper.ViewModels
 		public BackupSettingsViewModelSample() : base(new BackupExecution()
 		{
 			TemporaryFilePath = @"X:\\Workspace\Backupper\Stockpile\",
-			AllowOverwrite = true
+			AllowOverwrite = true,
+			BufferLengthMByte = 256,
+			IsCompress = true
 		} )
 		{ }
 	}

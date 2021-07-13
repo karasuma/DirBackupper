@@ -30,12 +30,7 @@
                 <Label Grid.Column="0" Style="{StaticResource Display}" Content="Setup file path" />
                 <Label Grid.Column="1" Margin="8,3" Content="{Binding SetupFilePath.Value}" Foreground="DimGray" />
             </ItemsControl>
-
-            <ItemsControl Style="{StaticResource Block}">
-                <Label Grid.Column="0" Style="{StaticResource Display}" Content="Allow multiple startup" />
-                <CheckBox Grid.Column="1" Content="" Margin="8,0" IsChecked="{Binding AllowMultipleSetup.Value}" />
-            </ItemsControl>
-
+            
             <ItemsControl Style="{StaticResource Block}">
                 <Label Grid.Column="0" Style="{StaticResource Display}" Content="Development mode" />
                 <CheckBox Grid.Column="1" Content="CAUTION: Development contents may affect your computer system." IsChecked="{Binding IsDevelopmentMode.Value}" FontWeight="DemiBold" Foreground="Crimson" Margin="8,0" x:Name="devCheck" />

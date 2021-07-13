@@ -16,9 +16,9 @@ namespace DirBackupper.Converters
 				case MessageStatus.Info:
 					return new SolidColorBrush( Colors.CornflowerBlue );
 				case MessageStatus.Working:
-					return new SolidColorBrush( Colors.LightGreen );
+					return new SolidColorBrush( Colors.LimeGreen );
 				case MessageStatus.Warning:
-					return new SolidColorBrush( Colors.Yellow );
+					return new SolidColorBrush( Colors.Goldenrod );
 			}
 			return new SolidColorBrush( Colors.Tomato );
 		}

@@ -1,14 +1,9 @@
 ﻿using Prism.Mvvm;
-using Prism;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
+using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace DirBackupper.Models
 {
@@ -35,7 +30,8 @@ namespace DirBackupper.Models
 			public string DestinationFilePath { get; set; }
 			public string TemporaryFilePath { get; set; }
 			public bool AllowOverwrite { get; set; }
-			public bool AllowMultipleStartup { get; set; }
+			public uint BufferSize { get; set; }
+			public bool IsCompress { get; set; }
 		}
 
 		private BackupExecution _backupExecution = null;
@@ -53,7 +49,8 @@ namespace DirBackupper.Models
 				DestinationFilePath = _backupExecution.DestinationFilePath,
 				TemporaryFilePath = _backupExecution.TemporaryFilePath,
 				AllowOverwrite = _backupExecution.AllowOverwrite,
-				AllowMultipleStartup = AllowMultipleStartup
+				BufferSize = _backupExecution.BufferLengthMByte,
+				IsCompress = _backupExecution.IsCompress
 			};
 
 			using ( var writer = new FileStream( SetupFilePath, FileMode.Create, FileAccess.Write ) )
@@ -70,20 +67,8 @@ namespace DirBackupper.Models
 			_backupExecution.DestinationFilePath = poco.DestinationFilePath;
 			_backupExecution.TemporaryFilePath = poco.TemporaryFilePath;
 			_backupExecution.AllowOverwrite = poco.AllowOverwrite;
-			AllowMultipleStartup = poco.AllowMultipleStartup;
-		}
-
-		public static bool CanStartupMultiple()
-		{
-			try
-			{
-				using ( var reader = new StreamReader( _setupFilePath, Encoding.UTF8 ) )
-					return JsonSerializer.Deserialize<SystemSettingsPOCOs>( reader.ReadToEnd() ).AllowMultipleStartup;
-			}
-			catch
-			{
-				return false;
-			}
+			_backupExecution.BufferLengthMByte = poco.BufferSize;
+			_backupExecution.IsCompress = poco.IsCompress;
 		}
 	}
 }

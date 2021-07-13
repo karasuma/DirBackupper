@@ -3,6 +3,7 @@ using DirBackupperUnitTest.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DirBackupperUnitTest.Models
@@ -42,6 +43,17 @@ namespace DirBackupperUnitTest.Models
 
 				Trace.Listeners.Remove( listener );
 			}
+		}
+
+		[TestMethod]
+		public void RemoveTempDirTestAsync()
+		{
+			// Arrange
+			var restore = new Restore( true );
+			Tools.CreateDir( restore.TemporaryPath );
+
+			// Act & Assert
+			DirBackupper.Utils.Tools.DestructDirectory( restore.TemporaryPath );
 		}
 	}
 }
