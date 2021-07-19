@@ -29,7 +29,8 @@ namespace DirBackupper.ViewModels
 				 using ( var dialog = new CommonOpenFileDialog()
 				 {
 					 Title = "Choose backup source directory",
-					 IsFolderPicker = true
+					 IsFolderPicker = true,
+					 InitialDirectory = SourcePath.Value
 				 } )
 				 {
 					 if ( dialog.ShowDialog() == CommonFileDialogResult.Ok )
@@ -42,7 +43,8 @@ namespace DirBackupper.ViewModels
 				using ( var dialog = new CommonOpenFileDialog()
 				{
 					Title = "Choose backup destination directory",
-					IsFolderPicker = true
+					IsFolderPicker = true,
+					InitialDirectory = DestPath.Value
 				} )
 				{
 					if ( dialog.ShowDialog() == CommonFileDialogResult.Ok )

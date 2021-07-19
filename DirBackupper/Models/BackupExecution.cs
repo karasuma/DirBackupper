@@ -7,6 +7,7 @@ using DirBackupper.Utils;
 using System.Linq;
 using System.Threading;
 using System.IO.Compression;
+using DirBackupper.Utils;
 
 namespace DirBackupper.Models
 {
@@ -74,6 +75,12 @@ namespace DirBackupper.Models
 			get => _isCompress;
 			set => SetProperty( ref _isCompress, value );
 		}
+		private bool _compressInDest = false;
+		public bool CompressInDest
+		{
+			get => _compressInDest;
+			set => SetProperty( ref _compressInDest, value );
+		}
 
 		private Modules.Backup _backup = new Modules.Backup( true );
 		private Modules.Restore _restore = new Modules.Restore( true );
@@ -101,21 +108,60 @@ namespace DirBackupper.Models
 			var sourcePath = SourceDirectoryPath.AddDirectoryIdentify();
 			var backupPath = DestinationFilePath.AddDirectoryIdentify();
 
-			using ( _backupCancellation = new CancellationTokenSource() )
-			{
-				var result = await _backup.Execute( progress, sourcePath, backupPath );
-				if ( result == Modules.TaskDoneStatus.Completed && IsCompress )
-				{
-					progress.Report( new Modules.ProgressInfo( new KeyValuePair<int, int>( 1, 1 ), "Compressing backup directory..." ) );
-					var backupZipPath = ( backupPath.Last() == '\\' ? backupPath.Substring( 0, backupPath.Length - 1 ) : backupPath ) + ".zip";
-					if ( File.Exists( backupZipPath ) ) File.Delete( backupZipPath );
-					await Task.Run( () => ZipFile.CreateFromDirectory( backupPath, backupZipPath ) );
-				}
-				await Task.Run( () => Tools.DestructDirectory( backupPath ) );
+			// Backup
+			Toast.Pop( "Backup started.", $"Backup operation execute ({DateTime.Now:yyyy/MM/dd HH:mm})", $"from: {sourcePath}", $"dest: {backupPath}" );
+			var result = await _backup.Execute( progress, sourcePath, backupPath );
 
-				progress.Report( new Modules.ProgressInfo( new KeyValuePair<int, int>( 0, 1 ), string.Empty ) );
+			// Compress
+			if ( result == Modules.TaskDoneStatus.Completed && IsCompress )
+			{
+				progress.Report( new Modules.ProgressInfo( new KeyValuePair<int, int>( 1, 1 ), "Compressing backup directory..." ) );
+				var backupZipPath = ( backupPath.Last() == '\\' ? backupPath.Substring( 0, backupPath.Length - 1 ) : backupPath ) + ".zip";
+				if ( CompressInDest )
+				{
+					var zipname = backupZipPath.Substring(backupZipPath.LastIndexOf('\\') + 1, backupZipPath.Length - backupZipPath.LastIndexOf('\\') - 1);
+					backupZipPath = backupZipPath.Replace( zipname, zipname.Replace( ".zip", string.Empty ) + "\\" + zipname );
+				}
+
+				if ( File.Exists( backupZipPath ) ) File.Delete( backupZipPath );
+				try
+				{
+					using ( _backupCancellation = new CancellationTokenSource() )
+					{
+						await Task.Run( async () =>
+						 {
+							 if ( CompressInDest )
+							 {
+								 if ( !Directory.Exists( TemporaryFilePath ) ) Directory.CreateDirectory( TemporaryFilePath );
+								 var zipname = backupZipPath.Substring(backupZipPath.LastIndexOf('\\') + 1, backupZipPath.Length - backupZipPath.LastIndexOf('\\') - 1);
+								 if ( File.Exists( TemporaryFilePath.AddDirectoryIdentify() + zipname ) )
+									 File.Delete( TemporaryFilePath.AddDirectoryIdentify() + zipname );
+								 ZipFile.CreateFromDirectory( backupPath, TemporaryFilePath.AddDirectoryIdentify() + zipname );
+								 Tools.DestructDirectory( backupPath, dontRemoveRoot: true );
+								 await Tools.CopyFileStrictlyAsync( TemporaryFilePath.AddDirectoryIdentify() + zipname, backupZipPath, RealBufferLengthByte, _backupCancellation.Token );
+								 Tools.DestructDirectory( TemporaryFilePath );
+							 }
+							 else
+							 {
+								 ZipFile.CreateFromDirectory( backupPath, backupZipPath );
+								 Tools.DestructDirectory( backupPath );
+							 }
+						 }, _backupCancellation.Token );
+					}
+				}
+				catch ( TaskCanceledException ) { } // DO NOTHING WHEN TASK CANCELLED
+			}
+
+			if ( result != Modules.TaskDoneStatus.Completed )
+			{
+				Toast.Pop( "Backup failed...", $"Backup operation {result} ({DateTime.Now:yyyy/MM/dd HH:mm})" );
 				return result;
 			}
+
+			Toast.Pop( "Backup done!", $"Backup operation {result} ({DateTime.Now:yyyy/MM/dd HH:mm})" );
+
+			progress.Report( new Modules.ProgressInfo( new KeyValuePair<int, int>( 0, 0 ), string.Empty ) );
+			return result;
 		}
 
 		public async Task<Modules.TaskDoneStatus> ExecuteRestore(IProgress<Modules.ProgressInfo> progress)
@@ -126,38 +172,79 @@ namespace DirBackupper.Models
 			var restorePath = SourceDirectoryPath.AddDirectoryIdentify();
 			var backupPath = DestinationFilePath.AddDirectoryIdentify();
 
+			Toast.Pop( "Processing...", $"Restore operation execute ({DateTime.Now:yyyy/MM/dd HH:mm})" );
+
+			// Decompress
 			if ( IsCompress )
 			{
+				progress.Report( new Modules.ProgressInfo( new KeyValuePair<int, int>( 1, 1 ), "Decompressing backup directory..." ) );
 				var backupZipPath = (backupPath.Last() == '\\' ? backupPath.Substring(0, backupPath.Length - 1) : backupPath) + ".zip";
+				if ( CompressInDest )
+				{
+					var zipname = backupZipPath.Substring(backupZipPath.LastIndexOf('\\') + 1, backupZipPath.Length - backupZipPath.LastIndexOf('\\') - 1);
+					backupZipPath = backupZipPath.Replace( zipname, zipname.Replace( ".zip", string.Empty ) + "\\" + zipname );
+				}
 				if ( !File.Exists( backupZipPath ) )
 				{
 					progress.Report( new Modules.ProgressInfo( new KeyValuePair<int, int>( 0, 1 ), "Backup data not found..." ) );
 					return Modules.TaskDoneStatus.Failed;
 				}
-				progress.Report( new Modules.ProgressInfo( new KeyValuePair<int, int>( 1, 1 ), "Decompressing backup directory..." ) );
-				await Task.Run( () => ZipFile.ExtractToDirectory( backupZipPath, backupPath ) );
+				using ( _restoreCancellation = new CancellationTokenSource() )
+				{
+					try
+					{
+						await Task.Run( () =>
+						{
+							if ( CompressInDest )
+							{
+								backupPath = backupPath.AddDirectoryIdentify() + $"Stockpile_{Guid.NewGuid().ToString( "N" ).Substring( 0, 8 )}\\";
+								Directory.CreateDirectory( backupPath );
+							}
+							else
+							{
+								Tools.DestructDirectory( backupPath, dontRemoveRoot: false );
+							}
+							Tools.ExtractToDirectoryEx( backupZipPath, backupPath, false );
+
+						}, _restoreCancellation.Token );
+					}
+					catch ( TaskCanceledException )
+					{
+						Tools.DestructDirectory( backupPath );
+						Toast.Pop( "Restore cancelled", $"Restore operation Cancelled ({DateTime.Now:yyyy/MM/dd HH:mm})" );
+						return Modules.TaskDoneStatus.Cancelled;
+					}
+				}
 			}
 
-			using ( _restoreCancellation = new CancellationTokenSource() )
+			// Restore
+			var restoreResult = await _restore.BackupToTemporary( restorePath );
+			if ( restoreResult != Modules.TaskDoneStatus.Completed )
 			{
-				var backupResult = await _restore.BackupToTemporary( restorePath );
-				if ( backupResult != Modules.TaskDoneStatus.Completed )
-				{
-					progress.Report( new Modules.ProgressInfo( new KeyValuePair<int, int>( 0, 1 ), "Failed to create temporary directory." ) );
-					return backupResult;
-				}
-
-				var result = await _backup.Execute( progress, backupPath, restorePath );
-				if ( result != Modules.TaskDoneStatus.Completed )
-				{
-					progress.Report( new Modules.ProgressInfo( new KeyValuePair<int, int>( 0, 1 ), "Failed to restore." ) );
-				}
-				else
-				{
-					progress.Report( new Modules.ProgressInfo( new KeyValuePair<int, int>( 0, 1 ), string.Empty ) );
-				}
-				return result;
+				progress.Report( new Modules.ProgressInfo( new KeyValuePair<int, int>( 0, 1 ), "Failed to create temporary directory." ) );
+				return restoreResult;
 			}
+
+			var result = await _backup.Execute( progress, backupPath, restorePath );
+			if ( result != Modules.TaskDoneStatus.Completed )
+			{
+				// Recovery from temporary to restore target
+				var recoveryResult = await _restore.Recovery( restorePath );
+				progress.Report( new Modules.ProgressInfo( new KeyValuePair<int, int>( 0, 1 ), "Failed to restore." ) );
+				if ( recoveryResult != Modules.TaskDoneStatus.Completed )
+				{
+					Toast.Pop( "Restore failed", "Sorry, recovery operation from temporary to restore target failed.", "Some your important files may broke..." );
+					return recoveryResult;
+				}
+				Toast.Pop( "Restore failed", $"Restore operation {result} ({DateTime.Now:yyyy/MM/dd HH:mm})" );
+				return recoveryResult;
+			}
+
+			if ( IsCompress )
+				await Task.Run( () => Tools.DestructDirectory( backupPath ) );
+			progress.Report( new Modules.ProgressInfo( new KeyValuePair<int, int>( 0, 1 ), string.Empty ) );
+			Toast.Pop( "Done!", $"Restore operation {result} ({DateTime.Now:yyyy/MM/dd HH:mm})" );
+			return result;
 		}
 
 		public async Task DummyExecute(IProgress<Modules.ProgressInfo> progress)
@@ -165,18 +252,25 @@ namespace DirBackupper.Models
 			using ( _dummyCancellation = new CancellationTokenSource() )
 			{
 				var max = 50;
-				await Task.Run( async () =>
+				try
 				{
-					foreach ( var count in Enumerable.Range( 0, max + 1 ) )
+					await Task.Run( async () =>
 					{
-						if ( _dummyCancellation.IsCancellationRequested ) return;
-						var info = new Modules.ProgressInfo( new KeyValuePair<int, int>( count, max ), "Processing" + new string( '.', ( count % 3 ) + 1 ) );
-						progress.Report( info );
-						await Task.Delay( 100 );
-					}
-					progress.Report( new Modules.ProgressInfo( new KeyValuePair<int, int>( max, max ), "Completed!" ) );
-				}, _dummyCancellation.Token );
+						foreach ( var count in Enumerable.Range( 0, max + 1 ) )
+						{
+							if ( _dummyCancellation.IsCancellationRequested ) return;
+							var info = new Modules.ProgressInfo( new KeyValuePair<int, int>( count, max ), "Processing" + new string( '.', ( count % 3 ) + 1 ) );
+							progress.Report( info );
+							await Task.Delay( 100 );
+						}
+						progress.Report( new Modules.ProgressInfo( new KeyValuePair<int, int>( max, max ), "Completed!" ) );
+					}, _dummyCancellation.Token );
+				}
+				catch ( TaskCanceledException ) { } // DO NOTHING WHEN TASK CANCELLED
 			}
 		}
+
+		public bool CheckSourceDirectoryExists()
+			=> Directory.Exists( SourceDirectoryPath ) && SourceDirectoryPath.IndexOfAny( Path.GetInvalidPathChars() ) == -1;
 	}
 }

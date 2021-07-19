@@ -57,6 +57,11 @@
                 <Label Grid.Column="0" Style="{StaticResource Display}" Content="Compress backup data" />
                 <CheckBox Grid.Column="1" Margin="16,0" Content="Applies also restore operation if checked." VerticalAlignment="Center" IsChecked="{Binding CompressBackup.Value}" />
             </ItemsControl>
+
+            <ItemsControl Style="{StaticResource Block}" IsEnabled="{Binding CompressBackup.Value}">
+                <Label Grid.Column="0" Style="{StaticResource Display}" Content="Compress in dest file" />
+                <CheckBox Grid.Column="1" Margin="16,0" Content="" VerticalAlignment="Center" IsChecked="{Binding CompressInDest.Value}" />
+            </ItemsControl>
         </StackPanel>
     </Grid>
 </UserControl>

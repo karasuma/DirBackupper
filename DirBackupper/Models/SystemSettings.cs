@@ -32,6 +32,7 @@ namespace DirBackupper.Models
 			public bool AllowOverwrite { get; set; }
 			public uint BufferSize { get; set; }
 			public bool IsCompress { get; set; }
+			public bool CompressInDest { get; set; }
 		}
 
 		private BackupExecution _backupExecution = null;
@@ -50,7 +51,8 @@ namespace DirBackupper.Models
 				TemporaryFilePath = _backupExecution.TemporaryFilePath,
 				AllowOverwrite = _backupExecution.AllowOverwrite,
 				BufferSize = _backupExecution.BufferLengthMByte,
-				IsCompress = _backupExecution.IsCompress
+				IsCompress = _backupExecution.IsCompress,
+				CompressInDest = _backupExecution.CompressInDest
 			};
 
 			using ( var writer = new FileStream( SetupFilePath, FileMode.Create, FileAccess.Write ) )
@@ -69,6 +71,7 @@ namespace DirBackupper.Models
 			_backupExecution.AllowOverwrite = poco.AllowOverwrite;
 			_backupExecution.BufferLengthMByte = poco.BufferSize;
 			_backupExecution.IsCompress = poco.IsCompress;
+			_backupExecution.CompressInDest = poco.CompressInDest;
 		}
 	}
 }

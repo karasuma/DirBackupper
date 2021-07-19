@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -49,21 +50,19 @@ namespace DirBackupper.Utils
 
 		public static void CreateDirectoryRecursive(string path)
 		{
-			var dir = Path.GetDirectoryName( path );
-			if ( !Directory.Exists( dir ) )
-				CreateDirectoryRecursive( dir.Substring( 0, dir.LastIndexOf( @"\" ) ) );
-
-			Directory.CreateDirectory( dir );
+			if ( !Directory.Exists( path ) )
+				CreateDirectoryRecursive( path.Substring( 0, path.LastIndexOf( @"\" ) ) );
+			Directory.CreateDirectory( path );
 		}
 
 		public static string AddDirectoryIdentify(this string path)
 			=> ( path.Length > 0 && path.Last() != '\\' ) ? path + "\\" : path;
 
-		public static void DestructDirectory(string path)
+		public static void DestructDirectory(string path, IEnumerable<string> ignoreFiles = null, bool dontRemoveRoot = false)
 		{
 			if ( !Directory.Exists( path ) ) return;
 
-			foreach ( var src in Directory.GetFiles( path, "*", SearchOption.AllDirectories ) )
+			foreach ( var src in Directory.GetFiles( path, "*", SearchOption.AllDirectories ).Where( p => !( ignoreFiles?.Any( f => f == p ) ?? false ) ) )
 			{
 				File.SetAttributes( src, FileAttributes.Normal );
 				File.Delete( src );
@@ -71,10 +70,33 @@ namespace DirBackupper.Utils
 
 			foreach ( var src in Directory.GetDirectories( path, "*", SearchOption.AllDirectories ).Select( P => P.AddDirectoryIdentify() ) )
 			{
-				if ( Directory.Exists( src ) )
+				if ( Directory.Exists( src ) && !( ignoreFiles?.Any( f => f.Contains( src ) ) ?? false ) )
 					Directory.Delete( src, true );
 			}
-			Directory.Delete( path );
+
+			if ( !dontRemoveRoot )
+				Directory.Delete( path );
+		}
+
+		public static void ExtractToDirectoryEx(string sourceArchiveFilePath, string destinationDirectoryName, bool overwrite)
+		{
+			using ( var source = ZipFile.OpenRead( sourceArchiveFilePath ) )
+			{
+				var entries = source.Entries.Select( e => new { isdir = string.IsNullOrEmpty(e.Name), e = e } ).OrderBy( x => x.isdir );
+				foreach ( var entry in entries )
+				{
+					var fullname = entry.e.FullName.Replace( "/", @"\" );
+					var fullpath = Path.Combine( destinationDirectoryName, fullname );
+					if ( entry.isdir && !Directory.Exists( fullpath ) )
+						Directory.CreateDirectory( fullpath );
+					else if ( overwrite || !File.Exists( fullpath ) )
+					{
+						var currentDir = fullpath.Substring( 0, fullpath.LastIndexOf( @"\" ) );
+						CreateDirectoryRecursive( currentDir );
+						entry.e.ExtractToFile( fullpath, true );
+					}
+				}
+			}
 		}
 	}
 }

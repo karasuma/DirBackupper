@@ -32,12 +32,12 @@ namespace DirBackupperUnitTest.Models
 
 				Console.WriteLine( "Restore testing...(Create)" );
 				Tools.RemoveDir( SourceDir );
-				var restoreResult = await restore.RestoreExecute( SourceDir );
+				var restoreResult = await restore.Recovery( SourceDir );
 				if ( restoreResult != TaskDoneStatus.Completed )
 					Assert.Fail( $"Restore operation failed. ({restoreResult})" );
 
 				Console.WriteLine( "Restore testing...(Overwrite)" );
-				restoreResult = await restore.RestoreExecute( SourceDir );
+				restoreResult = await restore.Recovery( SourceDir );
 				if ( restoreResult != TaskDoneStatus.Completed )
 					Assert.Fail( $"Restore operation failed. ({restoreResult})" );
 

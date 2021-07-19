@@ -60,12 +60,18 @@ namespace DirBackupper.ViewModels
 					 var p = info.EventArgs;
 					 Progress.Value = (int)Math.Floor( p.Ratio * 100f );
 					 ProgressMessage.Value = p.Message;
-					 ProcessingRatio.Value = p.Ratio > 0.001f ? $"{p.ProcessingFiles.Key} / {p.ProcessingFiles.Value}" : string.Empty;
+					 ProcessingRatio.Value = p.ProcessingFiles.Value > 0 ? $"{p.ProcessingFiles.Key} / {p.ProcessingFiles.Value}" : string.Empty;
 				 } );
 
 			BackupExecuteCommand = _isCopyWorking.Select( f => !f ).ToAsyncReactiveCommand();
 			BackupExecuteCommand.Subscribe( async () =>
 			{
+				if ( !_model.BackupExecution.CheckSourceDirectoryExists() )
+				{
+					MessageBox.Show( "Backup source directory not found.", "Error", MessageBoxButton.OK, MessageBoxImage.Error );
+					return;
+				}
+
 				if ( SoftwareSettings.IsDevelopmentMode.Value && SoftwareSettings.ButtonExecutionTesting.Value )
 				{
 					_isCopyWorking.Value = true;
@@ -81,8 +87,8 @@ namespace DirBackupper.ViewModels
 					var result = await _model.BackupExecution.ExecuteBackup( _progressInfo );
 					if ( result == Models.Modules.TaskDoneStatus.Completed )
 						ChangeMessage( "Backup operation was successfully completed!", MessageStatus.Info, Logger.LogStates.Info );
-					else if ( result == Models.Modules.TaskDoneStatus.Failed )
-						ChangeMessage( "Backup operation failed.", MessageStatus.Error, Logger.LogStates.Error );
+					else
+						ChangeMessage( $"Backup operation {result}.", MessageStatus.Error, Logger.LogStates.Error );
 					_isCopyWorking.Value = false;
 				}
 			} );
@@ -105,6 +111,8 @@ namespace DirBackupper.ViewModels
 					var result = await _model.BackupExecution.ExecuteRestore( _progressInfo );
 					if ( result == Models.Modules.TaskDoneStatus.Completed )
 						ChangeMessage( "Restore operation was successfully completed!", MessageStatus.Info, Logger.LogStates.Info );
+					else
+						ChangeMessage( $"Restore operation was {result}.", MessageStatus.Info, Logger.LogStates.Info );
 					_isCopyWorking.Value = false;
 				}
 			} );

@@ -24,7 +24,7 @@ namespace DirBackupper.Models.Modules
 		private KeyValuePair<int, int> Progress(int current, int ceiling) => new KeyValuePair<int, int>( current, ceiling );
 
 		private void ReportInfo(IProgress<ProgressInfo> progress, KeyValuePair<int, int> status, string message)
-			=> progress.Report( new ProgressInfo( status, message ) );
+			=> progress?.Report( new ProgressInfo( status, message ) );
 
 		public async Task<TaskDoneStatus> Execute(IProgress<ProgressInfo> progress, string sourceDir, string destDir)
 		{
@@ -46,7 +46,7 @@ namespace DirBackupper.Models.Modules
 			using ( _cancellation = new CancellationTokenSource() )
 			{
 				var proceededFileCount = 0;
-				var allFiles = int.MaxValue;
+				var allFiles = Directory.GetFiles( sourceDir, "*", SearchOption.AllDirectories ).Length;
 				var currentRatio = new Func<KeyValuePair<int, int>>( () => Progress( proceededFileCount, allFiles ) );
 				ReportInfo( progress, currentRatio(), "Copy operation start." );
 
@@ -86,12 +86,12 @@ namespace DirBackupper.Models.Modules
 				}
 				catch ( TaskCanceledException ocex )
 				{
-					logging( "Copy operation cancelled.", ocex.ToString(), currentRatio(), Logger.LogStates.Warn );
+					logging( "Copy operation cancelled.", ocex.ToString(), new KeyValuePair<int, int>(), Logger.LogStates.Warn );
 					return TaskDoneStatus.Cancelled;
 				}
 				catch ( Exception unknownex )
 				{
-					logging( "Copy operation failed.", unknownex.ToString(), currentRatio(), Logger.LogStates.Error );
+					logging( "Copy operation failed.", unknownex.ToString(), new KeyValuePair<int, int>(), Logger.LogStates.Error );
 					return TaskDoneStatus.Failed;
 				}
 			}

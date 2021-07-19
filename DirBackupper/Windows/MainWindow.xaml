@@ -11,7 +11,7 @@
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type={x:Type vm:MainWindowViewModelSample}}"
         ResizeMode="NoResize"
-        Title="MainWindow" Height="284" Width="820">
+        Title="Directory Backupper" Height="284" Width="820">
     <Window.Resources>
         <conv:IsFloatZeroConverter x:Key="IsFloatZero" />
         <conv:MessageStatusToBrushConverter x:Key="StatusBrush" />
@@ -32,9 +32,9 @@
                     <views:BackupSettingsView DataContext="{Binding BackupSettings}" />
                 </ScrollViewer>
             </TabItem>
-            <TabItem Header="Schedule Settings">
+            <TabItem Header="Schedule Settings ( x )">
                 <ScrollViewer>
-                    <views:BackupScheduleSettingsView />
+                    <views:BackupScheduleSettingsView IsEnabled="False" />
                 </ScrollViewer>
             </TabItem>
             <TabItem Header="Software Settings">
@@ -60,7 +60,7 @@
             <Button Grid.Column="0" Content="Backup" Margin="6,1" Height="21" Command="{Binding BackupExecuteCommand}" />
             <Button Grid.Column="1" Content="Restore" Margin="6,1" Height="21" Command="{Binding RestoreExecuteCommand}" />
             <Button Grid.Column="2" Content="Abort" Margin="6,1" Height="21" Background="LightCoral" Command="{Binding AbortExecuteCommand}" />
-            <Label Grid.Column="3" Content="{Binding ProgressMessage.Value}" VerticalAlignment="Center" HorizontalAlignment="Right" />
+            <Label Grid.Column="3" Content="{Binding ProgressMessage.Value}" ToolTip="{Binding ProgressMessage.Value}" VerticalAlignment="Center" HorizontalAlignment="Right" />
             <ProgressBar Grid.Column="4" Margin="8,8" IsIndeterminate="{Binding ProgressWorking.Value}" Value="{Binding Progress.Value}" />
             <Label Grid.Column="5" Content="{Binding ProcessingRatio.Value}" VerticalAlignment="Center" />
         </Grid>

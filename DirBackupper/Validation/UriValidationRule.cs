@@ -1,17 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
+﻿using System.Globalization;
 using System.IO;
+using System.Windows.Controls;
 
 namespace DirBackupper.Validation
 {
 	public class UriValidationRule : ValidationRule
 	{
+		public bool CheckDirExists { get; set; } = false;
 		public override ValidationResult Validate(object value, CultureInfo cultureInfo)
-			=> value.ToString().IndexOfAny( Path.GetInvalidPathChars() ) == -1 ? ValidationResult.ValidResult : new ValidationResult( false, "Invalid path." );
+		{
+			var uri = value.ToString();
+			var valid = true;
+
+			valid &= uri.IndexOfAny( Path.GetInvalidPathChars() ) == -1;
+			if ( CheckDirExists )
+				valid &= Directory.Exists( uri );
+
+			return valid ? new ValidationResult( true, "" ) : new ValidationResult( false, "Invalid Path." );
+		}
 	}
 }
