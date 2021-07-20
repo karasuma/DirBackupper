@@ -77,7 +77,7 @@ namespace DirBackupper.Models.Modules
 							 if ( ignoreFiles?.Contains( Path.GetFileName( src ) ) ?? false ) continue;
 
 							 var dest = Path.Combine( Path.GetDirectoryName( destDir ), src.Substring( src.IndexOf( sourceDir ) + sourceDir.Length ) );
-							 var moved = AllowOverwrite || !File.Exists( src );
+							 var moved = AllowOverwrite || !File.Exists( dest );
 							 ReportInfo( progress, currentRatio(), moved ? $"Copying: {src}" : $"Hold: {dest}" );
 
 							 if ( moved )
