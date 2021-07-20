@@ -59,5 +59,15 @@ namespace DirBackupper.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   (アイコン) に類似した型 System.Drawing.Icon のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Icon data_backup_512 {
+            get {
+                object obj = ResourceManager.GetObject("data_backup_512", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
     }
 }
