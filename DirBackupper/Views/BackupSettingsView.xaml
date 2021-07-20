@@ -1,0 +1,100 @@
+﻿<UserControl x:Class="DirBackupper.Views.BackupSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:vm="clr-namespace:DirBackupper.ViewModels"
+             xmlns:valid="clr-namespace:DirBackupper.Validation"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DirBackupper.Views"
+             mc:Ignorable="d" 
+             Background="White"
+             d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type={x:Type vm:BackupSettingsViewModelSample}}"
+             d:DesignHeight="373" d:DesignWidth="800">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="./ViewToolsDictionary.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    
+    <Grid Margin="8,0">
+        <Grid.Resources>
+            <Style x:Key="InputArea" TargetType="TextBox">
+                <Setter Property="Margin" Value="16,0" />
+                <Setter Property="Height" Value="24" />
+            </Style>
+        </Grid.Resources>
+
+        <StackPanel Orientation="Vertical" Margin="0,8">
+            <ItemsControl Style="{StaticResource Block}">
+                <Label Grid.Column="0" Style="{StaticResource Display}" Content="Temporary directory" />
+                <!--<TextBox Grid.Column="1" Style="{StaticResource InputArea}">
+                    <TextBox.Text>
+                        <Binding Path="TemporaryPath.Value" UpdateSourceTrigger="PropertyChanged">
+                            <Binding.ValidationRules>
+                                <valid:UriValidationRule />
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>-->
+
+                <Grid Grid.Column="1" Margin="10,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="64" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0" Margin="6,0,24,0" Height="24">
+                        <TextBox.Text>
+                            <Binding Path="TemporaryPath.Value" UpdateSourceTrigger="PropertyChanged">
+                                <Binding.ValidationRules>
+                                    <valid:UriValidationRule />
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
+                    <Button Content="..." Grid.Column="1" Margin="0,0,12,0" Command="{Binding SelectTempPath}" />
+                </Grid>
+            </ItemsControl>
+
+            <ItemsControl Style="{StaticResource Block}">
+                <Label Grid.Column="0" Style="{StaticResource Display}" Content="Allow overwrite" />
+                <CheckBox Grid.Column="1" Margin="16,0" VerticalAlignment="Center" IsChecked="{Binding AllowOverwrite.Value}" />
+            </ItemsControl>
+
+            <ItemsControl Style="{StaticResource Block}">
+                <Label Grid.Column="0" Style="{StaticResource Display}" Content="Copy buffer length" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <TextBox Text="{Binding BufferLengthMB.Value}" Margin="16,0,0,0" Height="24" Width="48" HorizontalContentAlignment="Right" Padding="2" />
+                    <Label Content="MB (If value sets 0, the individual file copies all bytes on memory)" />
+                </StackPanel>
+            </ItemsControl>
+
+            <ItemsControl Style="{StaticResource Block}">
+                <Label Grid.Column="0" Style="{StaticResource Display}" Content="Compress backup data" />
+                <CheckBox Grid.Column="1" Margin="16,0" Content="Applies also restore operation if checked." VerticalAlignment="Center" IsChecked="{Binding CompressBackup.Value}" />
+            </ItemsControl>
+
+            <ItemsControl Style="{StaticResource Block}" IsEnabled="{Binding CompressBackup.Value}">
+                <Label Grid.Column="0" Style="{StaticResource Display}" Content="Compress in dest file" />
+                <CheckBox Grid.Column="1" Margin="16,0" Content="" VerticalAlignment="Center" IsChecked="{Binding CompressInDest.Value}" />
+            </ItemsControl>
+
+            <GroupBox Header="Ignore file name settings" Margin="10,0">
+                <StackPanel Orientation="Vertical">
+                    <ItemsControl Style="{StaticResource Block}">
+                        <Label Grid.Column="0" Content="Ignore files" Style="{StaticResource Display}" VerticalAlignment="Top" Margin="0,0,16,0" />
+                        <StackPanel Grid.Column="1" Orientation="Vertical">
+                            <ListView Margin="0,0,10,10" ItemsSource="{Binding IgnoreList}" SelectedItem="{Binding SelectedIgnore.Value}" />
+                            <TextBox Style="{StaticResource InputArea}" Margin="0,0,10,0" Text="{Binding IgnoreInputBox.Value, UpdateSourceTrigger=PropertyChanged}" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,12">
+                                <Button Content="Add" Width="58" Command="{Binding AddButton}" />
+                                <Button Content="Remove" Width="58" Margin="15,0" Command="{Binding RemoveButton}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </ItemsControl>
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
+    </Grid>
+</UserControl>

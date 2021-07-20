@@ -2,32 +2,51 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:vm="clr-namespace:DirBackupper.ViewModels"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DirBackupper.Views"
+             xmlns:valid="clr-namespace:DirBackupper.Validation"
              mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type={x:Type vm:BackupDirSelectionViewModelSample}}"
              Background="White" d:DesignWidth="800" Height="197.333">
     <Grid>
         <StackPanel Orientation="Vertical">
-            <Label Content="Source" />
+            <Label Content="Backup Source" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="64" />
                 </Grid.ColumnDefinitions>
-                <TextBox Grid.Column="0" Margin="6,0,24,0" Height="24" />
-                <Button Content="..." Grid.Column="1" Margin="0,0,12,0" />
+                <TextBox Grid.Column="0" Margin="6,0,24,0" Height="24">
+                    <TextBox.Text>
+                        <Binding Path="SourcePath.Value" UpdateSourceTrigger="PropertyChanged">
+                            <Binding.ValidationRules>
+                                <valid:UriValidationRule />
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+                <Button Content="..." Grid.Column="1" Margin="0,0,12,0" Command="{Binding SelectSourceDirectory}" />
             </Grid>
 
             <Separator Margin="7,18,7,8" Background="LightGray" />
 
-            <Label Content="Destination" />
+            <Label Content="Backup Destination" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="64" />
                 </Grid.ColumnDefinitions>
-                <TextBox Grid.Column="0" Margin="6,0,24,0" Height="24" />
-                <Button Content="..." Grid.Column="1" Margin="0,0,12,0" />
+                <TextBox Grid.Column="0" Margin="6,0,24,0" Height="24">
+                    <TextBox.Text>
+                        <Binding Path="DestPath.Value" UpdateSourceTrigger="PropertyChanged">
+                            <Binding.ValidationRules>
+                                <valid:UriValidationRule />
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+                <Button Content="..." Grid.Column="1" Margin="0,0,12,0" Command="{Binding SelectDestinationDirectory}" />
             </Grid>
         </StackPanel>
     </Grid>

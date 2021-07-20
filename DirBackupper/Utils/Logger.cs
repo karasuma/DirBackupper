@@ -28,11 +28,13 @@ namespace DirBackupper.Utils
 			[System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
 			[System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = -1)
 		{
+			var isErrorStatus = new Func<bool>(() => state == LogStates.Error || state == LogStates.Fatal);
+
 			// ログ文作成
 			var newline = Environment.NewLine;
 			var logstr =
-				$"[{state.ToString().ToUpper(),-5}] {DateTime.Now.ToString( "yyyy-MM-dd HH:mm:ss" )}{newline}" +
-				$"{memberName} at [{sourceFilePath}:{sourceLineNumber}]{newline}" +
+				$"[{state.ToString().ToUpper(),-5}] {DateTime.Now:yyyy-MM-dd HH:mm:ss}{newline}" +
+				( isErrorStatus() ? $"{memberName} at [{Path.GetFileName(sourceFilePath)}:{sourceLineNumber}]{newline}" : string.Empty ) +
 				$"{message}{newline}" +
 				$"{newline}";
 
