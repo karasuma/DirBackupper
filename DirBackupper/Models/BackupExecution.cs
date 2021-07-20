@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.IO.Compression;
 using DirBackupper.Utils;
+using System.Collections.ObjectModel;
 
 namespace DirBackupper.Models
 {
@@ -82,6 +83,8 @@ namespace DirBackupper.Models
 			set => SetProperty( ref _compressInDest, value );
 		}
 
+		public ObservableCollection<string> IgnoreList { get; } = new ObservableCollection<string>();
+
 		private Modules.Backup _backup = new Modules.Backup( true );
 		private Modules.Restore _restore = new Modules.Restore( true );
 		private CancellationTokenSource _backupCancellation;
@@ -110,7 +113,7 @@ namespace DirBackupper.Models
 
 			// Backup
 			Toast.Pop( "Backup started.", $"Backup operation execute ({DateTime.Now:yyyy/MM/dd HH:mm})", $"from: {sourcePath}", $"dest: {backupPath}" );
-			var result = await _backup.Execute( progress, sourcePath, backupPath );
+			var result = await _backup.Execute( progress, sourcePath, backupPath, IgnoreList );
 
 			// Compress
 			if ( result == Modules.TaskDoneStatus.Completed && IsCompress )
@@ -150,6 +153,11 @@ namespace DirBackupper.Models
 					}
 				}
 				catch ( TaskCanceledException ) { } // DO NOTHING WHEN TASK CANCELLED
+				catch ( Exception ex )
+				{
+					Logger.Log( $"Compression failed.{Tools.NewLine}{ex}", Logger.LogStates.Error );
+					result = Modules.TaskDoneStatus.Failed;
+				}
 			}
 
 			if ( result != Modules.TaskDoneStatus.Completed )
@@ -214,6 +222,11 @@ namespace DirBackupper.Models
 						Toast.Pop( "Restore cancelled", $"Restore operation Cancelled ({DateTime.Now:yyyy/MM/dd HH:mm})" );
 						return Modules.TaskDoneStatus.Cancelled;
 					}
+					catch ( Exception ex )
+					{
+						Logger.Log( $"Decompression failed.{Tools.NewLine}{ex}", Logger.LogStates.Error );
+						return Modules.TaskDoneStatus.Failed;
+					}
 				}
 			}
 
@@ -225,7 +238,7 @@ namespace DirBackupper.Models
 				return restoreResult;
 			}
 
-			var result = await _backup.Execute( progress, backupPath, restorePath );
+			var result = await _backup.Execute( progress, backupPath, restorePath, IgnoreList );
 			if ( result != Modules.TaskDoneStatus.Completed )
 			{
 				// Recovery from temporary to restore target

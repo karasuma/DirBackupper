@@ -34,7 +34,7 @@ namespace DirBackupper.Utils
 			var newline = Environment.NewLine;
 			var logstr =
 				$"[{state.ToString().ToUpper(),-5}] {DateTime.Now:yyyy-MM-dd HH:mm:ss}{newline}" +
-				( isErrorStatus() ? string.Empty : $"{memberName} at [{Path.GetFileName(sourceFilePath)}:{sourceLineNumber}]{newline}" ) +
+				( isErrorStatus() ? $"{memberName} at [{Path.GetFileName(sourceFilePath)}:{sourceLineNumber}]{newline}" : string.Empty ) +
 				$"{message}{newline}" +
 				$"{newline}";
 

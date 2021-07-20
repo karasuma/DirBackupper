@@ -98,5 +98,17 @@ namespace DirBackupper.Utils
 				}
 			}
 		}
+
+		public static void Reset<T>(this IList<T> self, T item)
+		{
+			self.Clear();
+			self.Add( item );
+		}
+
+		public static void Reset<T>(this IList<T> self, IEnumerable<T> items)
+		{
+			self.Clear();
+			foreach ( var item in items ) self.Add( item );
+		}
 	}
 }

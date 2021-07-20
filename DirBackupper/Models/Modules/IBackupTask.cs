@@ -29,7 +29,7 @@ namespace DirBackupper.Models.Modules
 
 	public interface IBackupTask
 	{
-		Task<TaskDoneStatus> Execute(IProgress<ProgressInfo> progress, string sourceDir, string destDir);
+		Task<TaskDoneStatus> Execute(IProgress<ProgressInfo> progress, string sourceDir, string destDir, IEnumerable<string> ignoreFiles);
 		void CancelExecute();
 		bool AllowOverwrite { get; set; }
 

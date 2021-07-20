@@ -1,9 +1,11 @@
 ﻿using Prism.Mvvm;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using DirBackupper.Utils;
 
 namespace DirBackupper.Models
 {
@@ -33,6 +35,7 @@ namespace DirBackupper.Models
 			public uint BufferSize { get; set; }
 			public bool IsCompress { get; set; }
 			public bool CompressInDest { get; set; }
+			public List<string> IgnoreList { get; set; } = new List<string>();
 		}
 
 		private BackupExecution _backupExecution = null;
@@ -52,7 +55,8 @@ namespace DirBackupper.Models
 				AllowOverwrite = _backupExecution.AllowOverwrite,
 				BufferSize = _backupExecution.BufferLengthMByte,
 				IsCompress = _backupExecution.IsCompress,
-				CompressInDest = _backupExecution.CompressInDest
+				CompressInDest = _backupExecution.CompressInDest,
+				IgnoreList = new List<string>(_backupExecution.IgnoreList)
 			};
 
 			using ( var writer = new FileStream( SetupFilePath, FileMode.Create, FileAccess.Write ) )
@@ -72,6 +76,7 @@ namespace DirBackupper.Models
 			_backupExecution.BufferLengthMByte = poco.BufferSize;
 			_backupExecution.IsCompress = poco.IsCompress;
 			_backupExecution.CompressInDest = poco.CompressInDest;
+			_backupExecution.IgnoreList.Reset( poco.IgnoreList );
 		}
 	}
 }

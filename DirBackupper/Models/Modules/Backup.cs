@@ -26,7 +26,7 @@ namespace DirBackupper.Models.Modules
 		private void ReportInfo(IProgress<ProgressInfo> progress, KeyValuePair<int, int> status, string message)
 			=> progress?.Report( new ProgressInfo( status, message ) );
 
-		public async Task<TaskDoneStatus> Execute(IProgress<ProgressInfo> progress, string sourceDir, string destDir)
+		public async Task<TaskDoneStatus> Execute(IProgress<ProgressInfo> progress, string sourceDir, string destDir, IEnumerable<string> ignoreFiles = null)
 		{
 			var message = new Func<string, string>( msg =>
 			 {
@@ -62,6 +62,7 @@ namespace DirBackupper.Models.Modules
 						 foreach ( var src in Directory.GetDirectories( sourceDir, "*", SearchOption.AllDirectories ).Select( p => p + "\\" ) )
 						 {
 							 if ( _cancellation.IsCancellationRequested ) return;
+
 							 var dest = Path.Combine( Path.GetDirectoryName( destDir ), src.Substring( src.IndexOf( sourceDir ) + sourceDir.Length ) );
 							 ReportInfo( progress, currentRatio(), $"dir: {dest}" );
 
@@ -73,6 +74,8 @@ namespace DirBackupper.Models.Modules
 						 foreach ( var src in Directory.GetFiles( sourceDir, "*", SearchOption.AllDirectories ) )
 						 {
 							 if ( _cancellation.IsCancellationRequested ) return;
+							 if ( ignoreFiles?.Contains( Path.GetFileName( src ) ) ?? false ) continue;
+
 							 var dest = Path.Combine( Path.GetDirectoryName( destDir ), src.Substring( src.IndexOf( sourceDir ) + sourceDir.Length ) );
 							 var moved = AllowOverwrite || !File.Exists( src );
 							 ReportInfo( progress, currentRatio(), moved ? $"Copying: {src}" : $"Hold: {dest}" );
