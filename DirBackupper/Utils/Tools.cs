@@ -34,6 +34,9 @@ namespace DirBackupper.Utils
 		/// <returns></returns>
 		public static async Task CopyFileStrictlyAsync(string source, string destination, uint copyBlockBytes, CancellationToken token)
 		{
+			var creationTime = File.GetCreationTime(source);
+			var lastWriteTime = File.GetLastWriteTime(source);
+			var lastAccessTime = File.GetLastAccessTime(source);
 			using ( var src = new FileStream( source, FileMode.Open, FileAccess.Read ) )
 			using ( var dst = new FileStream( destination, FileMode.OpenOrCreate, FileAccess.Write ) )
 			{
@@ -46,6 +49,9 @@ namespace DirBackupper.Utils
 					await dst.WriteAsync( buffer, 0, readLength, token );
 				}
 			}
+			File.SetCreationTime( destination, creationTime );
+			File.SetLastWriteTime( destination, lastWriteTime );
+			File.SetLastAccessTime( destination, lastAccessTime );
 		}
 
 		public static void CreateDirectoryRecursive(string path)
