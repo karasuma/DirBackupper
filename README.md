@@ -1,0 +1,2 @@
+# Directory Backupper
+ファイルの中身をよそへコピーするだけのやつ
