@@ -95,6 +95,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\HelpView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\SoftwareSettingsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -126,6 +130,7 @@
     <Compile Include="Validation\UriValidationRule.cs" />
     <Compile Include="ViewModels\BackupDirSelectionViewModel.cs" />
     <Compile Include="ViewModels\BackupSettingsViewModel.cs" />
+    <Compile Include="ViewModels\HelpViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\MessageViewModel.cs" />
     <Compile Include="ViewModels\SoftwareSettingsViewModel.cs" />
@@ -137,6 +142,9 @@
     </Compile>
     <Compile Include="Views\BackupSettingsView.xaml.cs">
       <DependentUpon>BackupSettingsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\HelpView.xaml.cs">
+      <DependentUpon>HelpView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SoftwareSettingsView.xaml.cs">
       <DependentUpon>SoftwareSettingsView.xaml</DependentUpon>

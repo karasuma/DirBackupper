@@ -7,7 +7,6 @@ using DirBackupper.Utils;
 using System.Linq;
 using System.Threading;
 using System.IO.Compression;
-using DirBackupper.Utils;
 using System.Collections.ObjectModel;
 
 namespace DirBackupper.Models

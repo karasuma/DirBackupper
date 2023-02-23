@@ -28,6 +28,7 @@ namespace DirBackupper.ViewModels
 		public MessageViewModel Message { get; protected set; }
 		public BackupDirSelectionViewModel BackupDir { get; protected set; }
 		public BackupSettingsViewModel BackupSettings { get; protected set; }
+		public HelpViewModel Helps { get; protected set; }
 
 		public AsyncReactiveCommand BackupExecuteCommand { get; }
 
@@ -43,8 +44,6 @@ namespace DirBackupper.ViewModels
 
 		public ReactiveProperty<string> ProcessingRatio { get; } = new ReactiveProperty<string>();
 
-		public ReactiveProperty<string> Help { get; } = new ReactiveProperty<string>();
-
 		public ReadOnlyReactiveProperty<bool> IsEditable { get; }
 
 		public MainWindowViewModel()
@@ -53,6 +52,7 @@ namespace DirBackupper.ViewModels
 			Message = new MessageViewModel( _model.MessageInfo );
 			BackupDir = new BackupDirSelectionViewModel( _model.BackupExecution );
 			BackupSettings = new BackupSettingsViewModel( _model.BackupExecution );
+			Helps = new HelpViewModel();
 
 			Observable.FromEventPattern<Models.Modules.ProgressInfo>( h => _progressInfo.ProgressChanged += h, h => _progressInfo.ProgressChanged -= h )
 				.Subscribe( info =>
@@ -137,11 +137,6 @@ namespace DirBackupper.ViewModels
 				 }
 			 } );
 
-			Help.Value = string.Join( Tools.NewLine, new[]
-			{
-				"Contact: https://twitter.com/yakumo_crow"
-			} );
-
 			IsEditable = _isCopyWorking.Select( x => !x ).ToReadOnlyReactiveProperty();
 
 			// Notify to complete initialize
@@ -180,6 +175,7 @@ namespace DirBackupper.ViewModels
 			Message = new MessageViewModelSample();
 			BackupDir = new BackupDirSelectionViewModelSample();
 			BackupSettings = new BackupSettingsViewModelSample();
+			Helps = new HelpViewModelSample();
 		}
 	}
 }
