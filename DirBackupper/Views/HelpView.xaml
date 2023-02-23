@@ -1,0 +1,25 @@
+﻿<UserControl x:Class="DirBackupper.Views.HelpView"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:vm="clr-namespace:DirBackupper.ViewModels"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:DirBackupper.Views"
+      mc:Ignorable="d"
+      d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type={x:Type vm:HelpViewModelSample}}"
+      d:DesignHeight="450" d:DesignWidth="800">
+
+    <StackPanel Orientation="Vertical" Background="White">
+        <TextBlock Text="{Binding Help.Value}" Margin="8" />
+        <TextBlock Margin="8">
+            Contact: 
+            <Hyperlink
+                NavigateUri="https://twitter.com/yakumo_crow"
+                RequestNavigate="Hyperlink_RequestNavigate"
+                >
+                https://twitter.com/yakumo_crow
+            </Hyperlink>
+        </TextBlock>
+
+    </StackPanel>
+</UserControl>

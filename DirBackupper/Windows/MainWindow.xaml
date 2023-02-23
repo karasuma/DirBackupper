@@ -37,13 +37,15 @@
                     <views:BackupScheduleSettingsView IsEnabled="False" />
                 </ScrollViewer>
             </TabItem>
-            <TabItem Header="Software Settings">
+            <!--<TabItem Header="Software Settings">
                 <ScrollViewer>
                     <views:SoftwareSettingsView DataContext="{Binding SoftwareSettings}" />
                 </ScrollViewer>
-            </TabItem>
+            </TabItem>-->
             <TabItem Header="Help">
-                <TextBlock Text="{Binding Help.Value}" Margin="8" />
+                <ScrollViewer>
+                    <views:HelpView DataContext="{Binding Helps}" />
+                </ScrollViewer>
             </TabItem>
         </TabControl>
 
