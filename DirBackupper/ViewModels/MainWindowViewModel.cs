@@ -79,8 +79,14 @@ namespace DirBackupper.ViewModels
 					await _model.BackupExecution.DummyExecute( _progressInfo );
 					ChangeMessage( "Operation Complete (TEST)", MessageStatus.Info );
 					_isCopyWorking.Value = false;
+					return;
 				}
-				else if ( MessageBox.Show( $"Copy files from source to destination.{Tools.NewLine}Are you sure?", "Backup confirm", MessageBoxButton.OKCancel, MessageBoxImage.Information ) == MessageBoxResult.OK )
+
+				var message =
+					$"Copy files in the directory{Tools.NewLine}{Tools.NewLine}" +
+					$"src: {_model.BackupExecution.SourceDirectoryPath}{Tools.NewLine}to : {_model.BackupExecution.DestinationFilePath}{Tools.NewLine}{Tools.NewLine}" +
+					$"Are you sure?";
+				if ( MessageBox.Show( message, "Backup confirm", MessageBoxButton.OKCancel, MessageBoxImage.Information ) == MessageBoxResult.OK )
 				{
 					_isCopyWorking.Value = true;
 					ChangeMessage( "Backup operation working...", MessageStatus.Working, Logger.LogStates.Info );
